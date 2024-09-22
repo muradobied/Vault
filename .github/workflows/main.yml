@@ -30,6 +30,7 @@ jobs:
         env:
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
         run: |
+          export VAULT_ADDR=http://vault.sociumtech.com
           vault kv get -format=json secret/myapp > secrets.json
           export SECRET_KEY=$(jq -r '.data.data.SECRET_KEY' secrets.json)
           export DB_PASSWORD=$(jq -r '.data.data.DB_PASSWORD' secrets.json)
