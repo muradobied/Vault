@@ -8,35 +8,47 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Install Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Retrieve secrets from Vault
-      env:
-        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-        VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
-      run: |
-        vault kv get -field=APP_SECRET kv/app-secret > .env
-        echo "APP_SECRET=$(cat .env)" >> $GITHUB_ENV
+      - name: Run tests
+        run: npm test
 
-    - name: Run Tests
-      run: npm test
+      - name: Install Vault
+        run: |
+          curl -o vault.zip https://releases.hashicorp.com/vault/1.9.0/vault_1.9.0_linux_amd64.zip
+          unzip vault.zip
+          sudo mv vault /usr/local/bin/
 
-    - name: Deploy to Hetzner Server
-      env:
-        HETZNER_IP: ${{ secrets.HETZNER_IP }}
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      run: |
-        echo "${SSH_PRIVATE_KEY}" > private_key.pem
-        chmod 600 private_key.pem
-        ssh -i private_key.pem -o StrictHostKeyChecking=no root@$HETZNER_IP "cd /Vault && git pull && npm install && pm2 restart app"
+      - name: Fetch secrets from Vault
+        env:
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+        run: |
+          export VAULT_ADDR=https://128.140.104.144:8200
+          vault kv get -format=json secret/myapp > secrets.json
+          export SECRET_KEY=$(jq -r '.data.data.SECRET_KEY' secrets.json)
+          export DB_PASSWORD=$(jq -r '.data.data.DB_PASSWORD' secrets.json)
+          echo "Secrets fetched from Vault"
+
+      - name: Deploy to Hetzner
+        env:
+          SECRET_KEY: $SECRET_KEY
+          DB_PASSWORD: $DB_PASSWORD
+        run: |
+          ssh root@128.140.104.144 "
+            cd /Vault &&
+            git pull origin main &&
+            export SECRET_KEY=${SECRET_KEY} &&
+            export DB_PASSWORD=${DB_PASSWORD} &&
+            npm install &&
+            pm2 restart all
+          "
