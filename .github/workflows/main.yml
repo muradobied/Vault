@@ -1,51 +1,26 @@
-name: CI/CD Pipeline
+name: Node.js CI/CD
 
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
       - name: Install dependencies
         run: npm install
 
-      - name: Install Vault
-        run: |
-          curl -o vault.zip https://releases.hashicorp.com/vault/1.9.0/vault_1.9.0_linux_amd64.zip
-          unzip vault.zip
-          sudo mv vault /usr/local/bin/
-
       - name: Fetch secrets from Vault
         env:
+          VAULT_ADDR: "http://vault.sociumtech.com"
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
         run: |
-          export VAULT_ADDR=http://vault.sociumtech.com
-          vault kv get -format=json secret/myapp > secrets.json
-          export SECRET_KEY=$(jq -r '.data.data.SECRET_KEY' secrets.json)
-          export DB_PASSWORD=$(jq -r '.data.data.DB_PASSWORD' secrets.json)
-          echo "Secrets fetched from Vault"
-
-      - name: Deploy to Hetzner
-        env:
-          SECRET_KEY: $SECRET_KEY
-          DB_PASSWORD: $DB_PASSWORD
-        run: |
-          ssh root@128.140.104.144 "
-            cd /Vault &&
-            git pull origin main &&
-            export SECRET_KEY=${SECRET_KEY} &&
-            export DB_PASSWORD=${DB_PASSWORD} &&
-            npm install &&
-            pm2 restart all
-          "
+          vault kv get -field=DB_PASSWORD secret/myapp > .env
+      - name: Run the app
+        run: node index.js
