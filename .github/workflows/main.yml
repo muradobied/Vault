@@ -25,7 +25,6 @@ jobs:
       env:
         VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
       run: |
-        sudo apt-get install -y vault
         vault login $VAULT_TOKEN
         vault kv get -field=APP_SECRET kv/app-secret > .env
         echo "APP_SECRET=$(cat .env)" >> $GITHUB_ENV
