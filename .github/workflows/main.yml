@@ -30,7 +30,6 @@ jobs:
         env:
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
         run: |
-          export VAULT_ADDR="http://128.140.104.144:8200"
           vault kv get -format=json secret/myapp > secrets.json
           export SECRET_KEY=$(jq -r '.data.data.SECRET_KEY' secrets.json)
           export DB_PASSWORD=$(jq -r '.data.data.DB_PASSWORD' secrets.json)
