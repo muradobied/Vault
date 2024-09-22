@@ -21,6 +21,6 @@ jobs:
           VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
         run: |
-          vault kv get -field=DB_PASSWORD secret/myapp > .env
+          vault kv get -field=db_pass123 cubbyhole/secret/myapp > .env
       - name: Run the app
         run: node index.js
