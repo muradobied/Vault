@@ -18,7 +18,7 @@ jobs:
 
       - name: Fetch secrets from Vault
         env:
-          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          VAULT_ADDR: 'http://vaults.sociumtech.com'
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
         run: |
           vault kv get -field=db_pass123 cubbyhole/secret/myapp > .env
