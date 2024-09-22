@@ -1,0 +1,43 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Retrieve secrets from Vault
+      env:
+        VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+      run: |
+        sudo apt-get install -y vault
+        vault login $VAULT_TOKEN
+        vault kv get -field=APP_SECRET kv/app-secret > .env
+        echo "APP_SECRET=$(cat .env)" >> $GITHUB_ENV
+
+    - name: Run Tests
+      run: npm test
+
+    - name: Deploy to Hetzner Server
+      env:
+        HETZNER_IP: ${{ secrets.HETZNER_IP }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        echo "${SSH_PRIVATE_KEY}" > private_key.pem
+        chmod 600 private_key.pem
+        ssh -i private_key.pem -o StrictHostKeyChecking=no root@$HETZNER_IP "cd /Vault && git pull && npm install && pm2 restart app"
