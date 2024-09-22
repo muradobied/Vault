@@ -23,6 +23,7 @@ jobs:
 
     - name: Retrieve secrets from Vault
       env:
+        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
         VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
       run: |
         sudo apt-get install -y vault
