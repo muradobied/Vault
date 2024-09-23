@@ -1,0 +1,44 @@
+name: Node.js CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test
+
+    - name: Build Docker image
+      run: docker build -t node-docker-vault-hetzner .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Deploy to Hetzner
+      run: |
+        scp -i ~/.ssh/hetzner_key.pem ./docker-compose.yml root@128.140.104.144:/home/user/app
+        ssh -i ~/.ssh/hetzner_key.pem root@128.140.104.144 "cd /home/user/app && docker-compose down && docker-compose up -d --build"
+      env:
+        VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
