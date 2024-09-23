@@ -39,6 +39,7 @@ jobs:
            host: ${{ secrets.HETZNER_IP }}
            username: ${{ secrets.SSH_USER }}
            key: ${{ secrets.SSH_KEY }}
+           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
            script: |  
                docker pull ${{ secrets.DOCKER_USER }}/node-docker-vault-hetzner:latest &&
