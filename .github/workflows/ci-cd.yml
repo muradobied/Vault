@@ -28,7 +28,7 @@ jobs:
       uses: appleboy/ssh-action@v0.1.0
       with:
         host: ${{ secrets.HETZNER_IP }}
-        username: 'root'
+        username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /root/Vault
