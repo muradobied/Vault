@@ -42,7 +42,7 @@ jobs:
         with:
            host: ${{ secrets.HETZNER_IP }}
            username: ${{ secrets.SSH_USER }}
-           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+           key: ${{ secrets.SSH_PRIVATE_KEY }}
            
 
            script: |  
