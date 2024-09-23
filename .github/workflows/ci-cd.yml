@@ -28,8 +28,8 @@ jobs:
       uses: appleboy/ssh-action@v0.1.0
       with:
         host: ${{ secrets.HETZNER_IP }}
-        username: ${{ secrets.SSH_PRIVATE_KEY }}
-        key: ${{ secrets.SSH_KEY }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /root/Vault
           git pull
