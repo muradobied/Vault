@@ -39,6 +39,10 @@ jobs:
       
       - name: Deploy to Hetzner server
         uses: appleboy/ssh-action@v1.0.0
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+          
         with:
            host: ${{ secrets.HETZNER_IP }}
            username: ${{ secrets.SSH_USER }}
@@ -52,6 +56,6 @@ jobs:
                docker run -d --name node-docker-vault-hetznerC -p 3000:3000 ${{ secrets.DOCKER_USER }}/node-docker-vault-hetzner:latest
 
     
-        env:
-           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
-           VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+        #env:
+           #VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+           #VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
