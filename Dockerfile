@@ -11,13 +11,7 @@ RUN npm install
 # Copy the rest of the app
 COPY . .
 
-# Expose the port
 EXPOSE 3000
-
-COPY fetch-secrets.sh /usr/local/bin/fetch-secrets.sh
-RUN chmod +x /usr/local/bin/fetch-secrets.sh
-
-ENTRYPOINT ["fetch-secrets.sh"]
 
 # Command to run the app
 CMD ["node", "index.js"]
