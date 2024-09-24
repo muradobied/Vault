@@ -15,4 +15,4 @@ services:
     image: vault
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: hvs.wuS9u8UxsGuc6varpKbeupYf
-      VAULT_ADDR: http://vaults.test.sociumtech.com
+      VAULT_ADDR: http://vaultstest.sociumtech.com
