@@ -27,9 +27,9 @@ jobs:
     - name: Login to Hetzner Server
       uses: appleboy/ssh-action@v0.1.0
       with:
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
         host: ${{ secrets.HETZNER_IP }}
         username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /root/Vault
           git pull
