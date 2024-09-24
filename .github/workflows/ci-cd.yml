@@ -16,15 +16,17 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v1
 
-      - name: Login to Hetzner
-        run: echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq curl docker.io
-
-      - name: Deploy Application
-        run: |
-          ssh -i ~/.ssh/id_rsa root@HETZNER_IP \
-          'cd /root/Vault && git pull && ./fetch-secrets.sh'
+      - name: Login to Hetzner Server
+        uses: appleboy/ssh-action@v0.1.0
+        with:
+          host: ${{ secrets.HETZNER_IP }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo apt-get update
+            sudo apt-get install -y jq curl docker.io
+            cd /root/Vault
+            git pull
+            chmod +x fetch-secrets.sh
+            ./fetch-secrets.sh
