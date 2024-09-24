@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Deploy to Hetzner
 
 on:
   push:
@@ -6,36 +6,25 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
 
-    - name: Install dependencies
-      run: |
-         npm install
-         sudo apt-get update
-         sudo apt-get install -y jq  # Install jq
-         sudo apt-get install -y docker-compose  # Install docker-compose
+      - name: Login to Hetzner
+        run: echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
 
-    - name: Build Docker image
-      run: docker build -t node-vault-hetzner .
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq curl docker.io
 
-    - name: Login to Hetzner Server
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.HETZNER_IP }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        script: |
-          cd /root/Vault
-          git pull
-          chmod +x ./fetch-secrets.sh
-          ./fetch-secrets.sh
+      - name: Deploy Application
+        run: |
+          ssh -i ~/.ssh/id_rsa root@HETZNER_IP \
+          'cd /root/Vault && git pull && ./fetch-secrets.sh'
