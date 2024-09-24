@@ -1,8 +1,20 @@
-version: '3'
+version: '3.8'
+
 services:
-  web:
+  app:
     build: .
+    environment:
+      - PORT=3000
+      - SECRET_MESSAGE=${SECRET_MESSAGE} # Use Vault secret here
     ports:
       - "3000:3000"
+    depends_on:
+      - vault
+
+  vault:
+    image: vault
     environment:
-      MY_SECRET: ${MY_SECRET}
+      VAULT_DEV_ROOT_TOKEN_ID: hvs.wuS9u8UxsGuc6varpKbeupYf
+      VAULT_ADDR: http://vaults.sociumtech.com
+    ports:
+      - "8200:8200"
