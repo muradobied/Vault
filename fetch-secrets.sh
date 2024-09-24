@@ -1,14 +1,15 @@
 #!/bin/bash
-# Fetch Vault secret
-SECRET_KEY=$(vault kv get -field=MY_SECRET secret/myapp)
 
-# Check if the secret is fetched correctly
-if [ -z "$SECRET_KEY" ]; then
-  echo "Failed to fetch secret from Vault. Using default secret."
-  SECRET_KEY="default_secret"
-fi
+# Fetch the secret from Vault
+VAULT_ADDR='http://vaultstest.sociumtech.com'
+VAULT_TOKEN='your-vault-token'
+SECRET_MESSAGE=$(curl \
+    --header "X-Vault-Token: root" \
+    --request GET \
+    http://127.0.0.1:8200/v1/secret/data/app | jq -r .data.data.SECRET_MESSAGE)
 
-# Export secrets as environment variables
-export My_SECRET=$SECRET_KEY
+# Export the secret as an environment variable
+export SECRET_MESSAGE=$SECRET_MESSAGE
 
-docker-compose up --build -d
+# Run Docker Compose
+docker-compose up --build
